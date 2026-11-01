@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viensco Solar – Design & Quote</title>
+<meta name="theme-color" content="#161616">
+<meta name="description" content="Solar system sizing calculator, component price list and client quotations – Viensco Synergy Ltd.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Viensco Solar">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="splash"><img src="logo-3d.jpg" alt="Viensco Synergy Ltd"></div>
+
+<header class="top noprint">
+  <img src="logo-mark.png" alt="">
+  <div class="grow"><b>Viensco Synergy Ltd</b><small>Solar design &amp; quotations</small></div>
+  <span id="netdot">Online</span>
+</header>
+
+<div class="bar noprint" id="installBar" hidden>
+  <p id="installMsg">Install Viensco Solar on your phone to use it offline.</p>
+  <button class="btn pri sm" id="installBtn">Install</button>
+  <button class="btn sm" id="installX" style="background:transparent;color:#fff;border-color:#555">Later</button>
+</div>
+
+<main>
+  <!-- ================= CALCULATOR ================= -->
+  <section class="view active" id="v-calc">
+    <div class="card">
+      <h2>1. Project</h2>
+      <div class="f"><label>System type</label>
+        <div class="seg" id="c-type">
+          <button data-v="offgrid">Off-grid</button><button data-v="hybrid">Hybrid</button><button data-v="ongrid">On-grid</button>
+        </div>
+        <div class="hint" id="c-typehint"></div>
+      </div>
+      <div class="grid2">
+        <div class="f"><label>State / location</label><select id="c-state"></select></div>
+        <div class="f"><label>Peak sun hours (PSH)</label><input id="c-psh" type="number" step="0.1" inputmode="decimal"></div>
+      </div>
+      <div class="grid3">
+        <div class="f"><label>Panel derate</label><input id="c-derate" type="number" step="0.05" inputmode="decimal"></div>
+        <div class="f"><label>Inverter factor</label><input id="c-invf" type="number" step="0.05" inputmode="decimal"></div>
+        <div class="f" id="c-daysW"><label>Days of autonomy</label><input id="c-days" type="number" step="0.5" min="0.5" inputmode="decimal"></div>
+      </div>
+      <div class="hint">PSH is pre-filled per state from typical averages – override it with a site figure if you have one. Derate 0.75 covers heat, dust, wiring &amp; inverter losses. Inverter factor 1.25 = 25% safety margin on peak load.</div>
+    </div>
+
+    <div class="card">
+      <h2>2. Load</h2>
+      <div class="seg" id="c-mode" style="margin-bottom:10px">
+        <button data-v="direct">Enter totals</button><button data-v="list">Appliance list</button>
+      </div>
+      <div id="c-direct" class="grid2">
+        <div class="f"><label>Peak load (kW)</label><input id="c-peak" type="number" step="0.1" inputmode="decimal"></div>
+        <div class="f"><label>Daily energy (kWh)</label><input id="c-daily" type="number" step="0.5" inputmode="decimal"></div>
+      </div>
+      <div id="c-listbox" hidden>
+        <div style="display:flex;gap:8px"><select id="c-preset"></select><button class="btn dark sm" id="c-addapp">Add</button></div>
+        <div style="overflow-x:auto;margin-top:8px"><table class="tbl" id="c-apps"></table></div>
+        <div class="grid2" style="margin-top:8px">
+          <div class="f"><label>Simultaneous use (%)</label><input id="c-simul" type="number" min="10" max="100" inputmode="numeric"></div>
+          <div class="kpi"><small>From list</small><b id="c-listsum">–</b></div>
+        </div>
+        <div class="hint">100% = everything can run at once (safest). Lower it only if you know loads are staggered.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Equipment</h2>
+      <div class="f"><label>Brand for automatic picks</label><select id="c-brand"><option value="generic">Generic list (default)</option><option value="itel">Itel price list</option><option value="any">Best price – any brand</option></select><div class="hint">Itel picks use the 31 Oct 2026 price list. Unclear or informal listings (Jiji, Facebook, "system" prices) are never picked automatically – choose them yourself below.</div></div>
+      <div class="f"><label>Inverter</label><select id="c-inv"></select></div>
+      <div class="f"><label>Battery</label><select id="c-bat"></select><div class="hint" id="c-bathint"></div></div>
+      <div class="grid2">
+        <div class="f"><label>Solar panel</label><select id="c-pv"></select></div>
+        <div class="f"><label>Panel cable run, one way (m)</label><input id="c-run" type="number" inputmode="numeric"></div>
+      </div>
+      <div class="f"><label>Battery depth of discharge (override)</label><input id="c-dod" type="number" step="0.05" placeholder="Auto from battery type" inputmode="decimal"></div>
+    </div>
+
+    <div class="card result" id="c-result"></div>
+
+    <div class="card" id="c-pbcard">
+      <h2>4. Payback estimate</h2>
+      <div class="grid2">
+        <div class="f"><label>Current power cost (₦ per kWh)</label><input id="c-kwhcost" type="number" inputmode="numeric"></div>
+        <div class="f"><label>Share of load solar covers (%)</label><input id="c-cover" type="number" inputmode="numeric"></div>
+      </div>
+      <div class="grid2">
+        <div class="f"><label>Yearly tariff rise (%)</label><input id="c-esc" type="number" step="0.5" inputmode="decimal"></div>
+        <div class="f"><label>System cost override (₦)</label><input id="c-cost" type="number" inputmode="numeric" placeholder="Auto from design"></div>
+      </div>
+      <div class="hint" style="margin:-4px 0 8px">Band A grid tariffs are above ₦200/kWh and generator power costs more – check your DisCo bill or the NERC website for the current rate.</div>
+      <div id="c-pb"></div>
+    </div>
+  </section>
+
+  <!-- ================= GUIDE ================= -->
+  <section class="view" id="v-guide"><div id="g-body"></div></section>
+
+  <!-- ================= CATALOGUE ================= -->
+  <section class="view" id="v-cat">
+    <div class="card">
+      <h2>Component price list</h2>
+      <input id="k-search" type="search" placeholder="Search components…">
+      <div class="chips" id="k-chips"></div>
+      <div id="k-list"></div>
+    </div>
+    <div class="card">
+      <h2>Add your own item</h2>
+      <div class="f"><label>Category</label><select id="n-cat"></select></div>
+      <div class="f"><label>Description</label><input id="n-name" placeholder="e.g. Victron SmartShunt 500A"></div>
+      <div class="grid2">
+        <div class="f"><label>Unit price (₦)</label><input id="n-price" type="number" inputmode="numeric"></div>
+        <div class="f"><label>Unit</label><input id="n-unit" value="pc"></div>
+      </div>
+      <button class="btn dark" id="n-add">Save item</button>
+    </div>
+  </section>
+
+  <!-- ================= QUOTE ================= -->
+  <section class="view" id="v-quote">
+    <div class="card noprint" id="q-form">
+      <div class="seg" id="q-type" style="margin-bottom:10px"><button data-v="quote">Quotation</button><button data-v="invoice">Invoice</button></div>
+      <h2><span id="q-formtitle">Client &amp; quotation</span> <small id="q-no" style="color:#7a7a7a;font-weight:400;font-size:12.5px"></small></h2>
+      <div class="grid2">
+        <div class="f"><label>Client name</label><input id="q-name"></div>
+        <div class="f"><label>Phone / WhatsApp</label><input id="q-phone" inputmode="tel"></div>
+      </div>
+      <div class="grid2">
+        <div class="f"><label>Email</label><input id="q-email" type="email"></div>
+        <div class="f"><label>State</label><select id="q-state"></select></div>
+      </div>
+      <div class="f"><label>Site address</label><input id="q-addr"></div>
+      <div class="f"><label>Project title</label><input id="q-title" placeholder="e.g. 12kW hybrid solar installation"></div>
+    </div>
+
+    <div class="card noprint" id="q-inv" hidden>
+      <h2>Invoice details</h2>
+      <div class="grid2">
+        <div class="f"><label>Invoice date</label><input id="q-idate" type="date"></div>
+        <div class="f"><label>Due in (days)</label><input id="q-due" type="number" inputmode="numeric"></div>
+      </div>
+      <div class="grid2">
+        <div class="f"><label>Client LPO / PO number</label><input id="q-lpo"></div>
+        <div class="f"><label>Amount paid so far (₦)</label><input id="q-paid" type="number" inputmode="decimal"></div>
+      </div>
+      <div class="hint">Switching a quotation to Invoice keeps all its items. The invoice gets its own number (INV/…) when you save, print or export it.</div>
+    </div>
+
+    <div class="card noprint" id="q-linesCard">
+      <h2>Items</h2>
+      <div id="q-design" class="hint" style="margin-bottom:6px"></div>
+      <div id="q-lines"></div>
+      <div class="btns">
+        <button class="btn dark sm" id="q-pick">+ Add from catalogue</button>
+        <button class="btn sm ghost" id="q-custom">+ Custom line</button>
+      </div>
+      <div id="q-picker" hidden style="margin-top:10px">
+        <input id="q-psearch" type="search" placeholder="Search to add…">
+        <div id="q-presults" style="max-height:260px;overflow:auto;margin-top:6px"></div>
+      </div>
+      <h3>Charges</h3>
+      <div class="grid3">
+        <div class="f"><label>Installation labour (%)</label><input id="q-lab" type="number" step="0.5" inputmode="decimal"></div>
+        <div class="f"><label>Transport (₦)</label><input id="q-trans" type="number" inputmode="numeric"></div>
+        <div class="f"><label>Discount (%)</label><input id="q-disc" type="number" step="0.5" inputmode="decimal"></div>
+      </div>
+      <div class="grid2">
+        <div class="f"><label>VAT</label><select id="q-vat"><option value="1">Add VAT</option><option value="0">No VAT</option></select></div>
+        <div class="f"><label>Valid for (days)</label><input id="q-valid" type="number" inputmode="numeric"></div>
+      </div>
+      <div class="f"><label>Extra notes (printed on quote)</label><textarea id="q-notes"></textarea></div>
+    </div>
+
+    <div class="btns noprint" style="margin:0 0 6px">
+      <button class="btn pri" id="q-pdf">⬇ Download PDF</button>
+      <button class="btn dark" id="q-img">🖼 Save image (PNG)</button>
+      <button class="btn" id="q-share">Share PDF</button>
+    </div>
+    <div class="btns noprint" style="margin:0 0 12px">
+      <button class="btn sm" id="q-print">Print</button>
+      <button class="btn sm" id="q-save">Save</button>
+      <button class="btn sm" id="q-wa">WhatsApp</button>
+      <button class="btn sm danger" id="q-new">New</button>
+    </div>
+    <div id="sheet"></div>
+  </section>
+
+  <!-- ================= MORE ================= -->
+  <section class="view" id="v-more">
+    <div class="card">
+      <h2>Saved quotes</h2>
+      <div id="m-saved"></div>
+    </div>
+    <div class="card">
+      <h2>Company details (printed on quotes)</h2>
+      <div class="f"><label>Company name</label><input data-s="company"></div>
+      <div class="f"><label>Address</label><input data-s="address" placeholder="Office address"></div>
+      <div class="grid2">
+        <div class="f"><label>Email</label><input data-s="email"></div>
+        <div class="f"><label>Phone</label><input data-s="phone"></div>
+      </div>
+      <div class="f"><label>WhatsApp</label><input data-s="whatsapp"></div>
+      <div class="f"><label>Bank details (shown under payment terms)</label><textarea data-s="bank" placeholder="Bank – Account name – Account number"></textarea></div>
+      <div class="f"><label>Payment terms</label><textarea data-s="payment"></textarea></div>
+      <div class="f"><label>Warranty &amp; other terms (quotations)</label><textarea data-s="terms"></textarea></div>
+      <div class="f"><label>Invoice payment terms</label><textarea data-s="invPayment"></textarea></div>
+      <div class="f"><label>Invoice terms &amp; conditions</label><textarea data-s="invTerms"></textarea></div>
+      <div class="grid3">
+        <div class="f"><label>Default labour %</label><input data-s="labour" type="number" step="0.5"></div>
+        <div class="f"><label>VAT %</label><input data-s="vatPct" type="number" step="0.5"></div>
+        <div class="f"><label>Valid (days)</label><input data-s="valid" type="number"></div>
+      </div>
+      <div class="f"><label>Signature on quotes</label><select data-s="sign"><option value="1">Show signature</option><option value="0">Leave blank to sign by hand</option></select></div>
+    </div>
+    <div class="card">
+      <h2>Prices</h2>
+      <div class="grid2" style="align-items:end">
+        <div class="f"><label>Raise / lower all prices by (%)</label><input id="m-pct" type="number" step="0.5" placeholder="e.g. 5 or -3"></div>
+        <div class="f"><button class="btn dark" id="m-apply" style="width:100%">Apply</button></div>
+      </div>
+      <button class="btn danger sm" id="m-reset">Reset all prices to defaults</button>
+      <div class="hint">Naira prices move often. Check your supplier lists and update here – every future quote uses your new prices.</div>
+    </div>
+    <div class="card">
+      <h2>App</h2>
+      <p id="m-install" style="margin:0 0 8px;font-size:13.5px"></p>
+      <button class="btn pri" id="m-installBtn">Install app</button>
+      <div id="m-diag" class="hint" style="margin-top:10px;line-height:1.7"></div>
+      <div class="hint" style="margin-top:10px">Everything you enter stays on this device. Sizing results and prices are estimates for planning – confirm with a site survey and the manufacturer's data sheets before ordering.</div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<nav class="tabs noprint">
+  <button data-tab="calc" class="on"><span>🧮</span>Calculator</button>
+  <button data-tab="cat"><span>📦</span>Catalogue</button>
+  <button data-tab="quote"><span>📄</span>Quote</button>
+  <button data-tab="guide"><span>📋</span>Guide</button>
+  <button data-tab="more"><span>⚙️</span>More</button>
+</nav>
+
+<script src="assets.js"></script>
+<script src="exporter.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
